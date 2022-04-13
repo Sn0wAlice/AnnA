@@ -18,8 +18,10 @@ import {
 } from "https://deno.land/x/tcp_socket@0.0.2/mods.ts";
 
 import { Message } from "./message/main.ts";
+import { group } from "./message/group.ts";
 
 const ins_message = new Message();
+const ins_group = new group();
 
 const server = new Server({
     port: 8080
@@ -58,7 +60,7 @@ server.on(Event.receive, (client: Client, data: Packet, length: number) => {
         if(body.name == "message"){
             ins_message.send(server.clients, body, client)
         } else if(body.name == "group"){
-            //send a service
+            ins_group.main(body, client, server.clients)
         } else if(body.name == "service"){
             //manage a service
         }

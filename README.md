@@ -41,13 +41,104 @@ My private secure retro chat
 todo
 
 
-## Service
-A ***Service*** is like a chat group
+## Group
+- user need to be auth
+
+1. send the websocket object: 
+```json
+{
+    "name": "group",
+    "uid": "${uid for cache and content backuping}",
+
+    "type": "create",
+    "infos": {
+        "name": "${group name}",
+        "public?": false,
+        "key": "${private key}"
+    }
+}
+```
 ### Create
+
 todo
 ### Delete
 todo
 ### Join
-todo
+- user need to be auth
+
+1. send the websocket object: 
+```json
+{
+    "name": "group",
+    "uid": "${uid for cache and content backuping}",
+
+    "type": "join",
+    "infos": {
+        "uid": "${group uid}",
+        "password?": "${password for private group}"
+    }
+}
+```
+
+### Set password
+- user need to be auth
+
+1. send the websocket object: 
+```json
+{
+    "name": "group",
+    "uid": "${uid for cache and content backuping}",
+
+    "type": "set_password",
+    "infos": {
+        "uid": "${group uid}",
+        "password": "${new password}"
+    }
+}
+```
+
+### Leave
+- user need to be auth
+
+1. send the websocket object: 
+```json
+{
+    "name": "group",
+    "uid": "${uid for cache and content backuping}",
+
+    "type": "leave",
+    "infos": {
+        "uid": "${group uid}"
+    }
+}
+```
+
+### List
+- user need to be auth
+
+1. send the websocket object: 
+```json
+{
+    "name": "group",
+    "uid": "${uid for cache and content backuping}",
+    "type": "list",
+}
+```
+
+### List user
+- user need to be auth
+
+1. send the websocket object: 
+```json
+{
+    "name": "group",
+    "uid": "${uid for cache and content backuping}",
+    "type": "list_members",
+    "infos": {
+        "uid": "${group uid}"
+    }
+}
+```
+
 ### Perms
 todo
