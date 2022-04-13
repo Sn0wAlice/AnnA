@@ -16,7 +16,23 @@ My private secure retro chat
 ```json
 {
     "name": "auth",
-    "password": "value"
+    "serverPassword": "value",
+
+    "username": "${username}",
+    "password": "${password}"
+}
+```
+
+## Server Register
+1. connect to the websocket
+2. send the server auth password
+```json
+{
+    "name": "register",
+    "serverPassword": "value",
+
+    "username": "${username}",
+    "password": "${password}"
 }
 ```
 
@@ -37,11 +53,10 @@ My private secure retro chat
 }
 ```
 
-## Send message to group
-todo
-
 
 ## Group
+
+### Create
 - user need to be auth
 
 1. send the websocket object: 
@@ -58,9 +73,6 @@ todo
     }
 }
 ```
-### Create
-
-todo
 ### Delete
 todo
 ### Join

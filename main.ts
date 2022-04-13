@@ -29,6 +29,11 @@ const server = new Server({
 
 const PASSWORD = "1234"
 
+let userDB = []
+try{
+    userDB = JSON.parse(Deno.readTextFileSync("./db/user.json"))
+} catch(err){}
+
 
 // Server listen
 server.on(Event.listen, (server: Deno.Listener) => {
@@ -61,24 +66,54 @@ server.on(Event.receive, (client: Client, data: Packet, length: number) => {
             ins_message.send(server.clients, body, client)
         } else if(body.name == "group"){
             ins_group.main(body, client, server.clients)
-        } else if(body.name == "service"){
-            //manage a service
         }
-
     } else {
         // force the client to authenticate
         if(body.name == "auth"){
             //check the password
-            if(body.password == PASSWORD){
-                client.auth = true
-                //create a client token xxxxxx-xxxxxx-xxxxxx-xxxxxx
-                client.token = "xxxxxxxx-xxxxxx-xxxxxx-xxxxxx"
-                client.key = body.key
-                client.write(JSON.stringify({
-                    name: "auth",
-                    success: true
-                }))
-                console.log("Client authenticated: "+client.token)
+            if(body.serverPassword == PASSWORD){
+                //check if username and password are correct
+                let user = userDB.find(user => user.username == body.username && user.password == body.password)
+                if(user){
+                    client.auth = true
+                    //create a client token xxxxxx-xxxxxx-xxxxxx-xxxxxx
+                    client.token = "xxxxxxxx-xxxxxx-xxxxxx-xxxxxx"
+                    client.key = body.username
+                    client.write(JSON.stringify({
+                        name: "auth",
+                        success: true,
+                        key: client.key
+                    }))
+                    console.log("Client authenticated: "+client.token)
+                } else {
+                    client.write(JSON.stringify({
+                        name: "auth",
+                        success: false
+                    }))
+                }
+            }
+        } else if(body.name == "register"){
+            //check the password
+            if(body.serverPassword == PASSWORD){
+                //username = key
+                //password = password
+                // check if the username is already taken
+                if(userDB.find(user => user.username == body.key)){
+                    client.write(JSON.stringify({
+                        name: "register",
+                        success: false
+                    }))
+                } else {
+                    userDB.push({
+                        username: body.username,
+                        password: body.password
+                    })
+                    Deno.writeTextFileSync("./db/user.json", JSON.stringify(userDB))
+                    client.write(JSON.stringify({
+                        name: "register",
+                        success: true
+                    }))
+                }
             }
         } else {
             client.write(JSON.stringify({

@@ -9,6 +9,7 @@ const SERVERPASSWORD = "1234"
 const CLIENTKEY = randomString(4)
 
 let curGroup = "none";
+let myUser = "";
 
 function init() {
     process.stdout.write("\x1Bc");
@@ -19,7 +20,7 @@ function output(content) {
     clearLine(process.stdout);
 
     //move cursor to the beginning of the line
-    moveCursor(process.stdout, -(curGroup.length+5), 0);
+    moveCursor(process.stdout, -((myUser+"["+curGroup+"]> ").length+5), 0);
 
     console.log(content);
     interface.prompt(true);
@@ -27,7 +28,7 @@ function output(content) {
 
 function input() {
     return new Promise(resolve => {
-        let question = "["+curGroup+"]> ";
+        let question = myUser+"["+curGroup+"]> ";
         interface.question(question, answer => {
             moveCursor(process.stdout, 0, -1);
             clearLine(process.stdout);
@@ -48,6 +49,7 @@ socket.on("data", buffer => {
     if(message.name == "auth"){
         if(message.success){
             output("~ You are now logged in!");
+            myUser = message.key +" - ";
         } else {
             output("~ Wrong password!");
         }
@@ -66,6 +68,12 @@ socket.on("data", buffer => {
             str = `[${message.group}] ${message.key}: ${message.message}`;
         }
         output(str);
+    } else if(message.name == "register"){
+        if(message.success){
+            output("~ You are now registered!");
+        } else {
+            output("~ Username already taken!");
+        }
     } else {
         output(JSON.stringify(message));
     }
@@ -81,11 +89,21 @@ async function main() {
 
         //here the message controller
         if(input.startsWith("/")){
-            if(input == "/login"){
+            if(input.startsWith("/login")){
+                let args = input.split(" ");
                 socket.write(JSON.stringify({
                     name: "auth",
-                    password: SERVERPASSWORD,
-                    key: CLIENTKEY
+                    serverPassword: SERVERPASSWORD,
+                    username: args[1],
+                    password: args[2]
+                }));
+            } else if(input.startsWith("/register")){
+                let args = input.split(" ");
+                socket.write(JSON.stringify({
+                    name: "register",
+                    serverPassword: SERVERPASSWORD,
+                    username: args[1],
+                    password: args[2]
                 }));
             } else if(input.startsWith('/dm')){
                 let [, user, message] = input.split(" ");
